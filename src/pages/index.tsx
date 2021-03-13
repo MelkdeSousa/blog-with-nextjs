@@ -1,22 +1,27 @@
-import React from 'react'
-import Head from 'next/head'
+import Link from 'next/link'
+import { getAllPosts } from '../lib/api'
 
-import RocketseatLogo from '../assets/rocketseat.svg'
-
-import { Container } from '../styles/pages/Home'
-
-const Home: React.FC = () => {
+export default ({ posts }) => {
   return (
-    <Container>
-      <Head>
-        <title>Homepage</title>
-      </Head>
+    <div>
+      <h1>Welcome to my Blog!</h1>
 
-      <RocketseatLogo />
-      <h1>ReactJS Structure</h1>
-      <p>A ReactJS + Next.js structure made by Rocketseat.</p>
-    </Container>
+      <p>Listagem de posts:</p>
+      {posts.map(post => (
+        <p>
+          <Link href={`/${post.slug}`}>
+            <a>{post.title}</a>
+          </Link>
+        </p>
+      ))}
+    </div>
   )
 }
 
-export default Home
+export function getStaticProps() {
+  const posts = getAllPosts(['title', 'date', 'slug'])
+
+  return {
+    props: { posts }
+  }
+}
