@@ -1,3 +1,4 @@
+import { GetStaticProps } from 'next'
 import Link from 'next/link'
 import { getAllPosts } from '../lib/api'
 
@@ -9,7 +10,7 @@ export default ({ posts }) => {
       <p>Listagem de posts:</p>
       {posts.map(post => (
         <p>
-          <Link href={`/${post.slug}`}>
+          <Link href="/posts/[slug]" as={`/posts/${post.slug}`}>
             <a>{post.title}</a>
           </Link>
         </p>
@@ -18,8 +19,8 @@ export default ({ posts }) => {
   )
 }
 
-export function getStaticProps() {
-  const posts = getAllPosts(['title', 'date', 'slug'])
+export const getStaticProps: GetStaticProps = async () => {
+  const posts = await getAllPosts(['title', 'date', 'slug'])
 
   return {
     props: { posts }
