@@ -1,21 +1,24 @@
-import fs from 'fs'
+import { promises as fs } from 'fs'
 import { join } from 'path'
 import matter from 'gray-matter'
 
 const postsDirectory = join(process.cwd(), 'src', 'posts')
 
-function getMarkdownsFiles() {
-  return fs.readdirSync(postsDirectory)
+async function getMarkdownsFiles() {
+  return await fs.readdir(postsDirectory)
 }
 
-export function getPost(slugOrFilename: string, fields: string[] = []) {
+export async function getPost(slugOrFilename: string, fields: string[] = []) {
   const slug = slugOrFilename.replace(/\.md$/, '')
   const directory = join(postsDirectory, `${slug}.md`)
-  const fileContents = fs.readFileSync(directory, 'utf8')
+  const fileContents = await fs.readFile(directory, 'utf8')
 
   const { data, content } = matter(fileContents)
 
-  const post = {}
+  const post = {
+    content: '',
+    slug: ''
+  } as { content: string; slug: string; [key: string]: any }
 
   fields.forEach(field => {
     if (field === 'content') post[field] = content
@@ -28,12 +31,12 @@ export function getPost(slugOrFilename: string, fields: string[] = []) {
   return post
 }
 
-export function getAllPosts(fields: string[] = []) {
-  const slugs = getMarkdownsFiles()
+export async function getAllPosts(fields: string[] = []) {
+  const slugs = await getMarkdownsFiles()
 
-  const posts = slugs
-    .map(slug => getPost(slug, fields))
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
+  const posts = await Promise.all(
+    slugs.map(async slug => await getPost(slug, fields))
+  )
 
   return posts
 }
